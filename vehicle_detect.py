@@ -78,8 +78,8 @@ def get_hog_features(img, orient, pix_per_cell, cell_per_block, vis=False, featu
         return features, hog_image
     else:      
         features = hog(img, orientations=orient, pixels_per_cell=(pix_per_cell, pix_per_cell),
-                       cells_per_block=(cell_per_block, cell_per_block), #transform_sqrt=False, 
                        #cells_per_block=(cell_per_block, cell_per_block), transform_sqrt=False, 
+                       cells_per_block=(cell_per_block, cell_per_block), #transform_sqrt=False, 
                        #visualise=False, feature_vector=feature_vec)
                        visualise=False)
         return features
@@ -215,7 +215,7 @@ def extract_features(imgs, color_space='RGB', spatial_size=(32, 32),
                 for channel in range(feature_image.shape[2]):
                     hog_features.append(get_hog_features(feature_image[:,:,channel], 
                                         orient, pix_per_cell, cell_per_block, 
-                                        vis=False, feature_vec=True))
+                                        vis=True, feature_vec=True))
                 hog_features = np.ravel(hog_features)        
             else:
                 hog_features = get_hog_features(feature_image[:,:,hog_channel], orient, 
@@ -223,6 +223,7 @@ def extract_features(imgs, color_space='RGB', spatial_size=(32, 32),
             # Append the new feature vector to the features list
             file_features.append(hog_features)
         features.append(np.concatenate(file_features))
+        #features = hog_features#(np.concatenate(file_features))
     # Return list of feature vectors
     return features
     
@@ -422,30 +423,37 @@ if data_info != {} and debug_data_look == True:
 	plt.show()
 
 # Generate a random index to look at a car image
-ind = np.random.randint(0, len(cars))
+#ind = np.random.randint(0, len(cars))
 # Read in the image
-image = mpimg.imread(cars[ind])
-gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+#image = mpimg.imread(cars[ind])
+#gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 # Define HOG parameters
-orient = 9
-pix_per_cell = 8
-cell_per_block = 2
+#orient = 9
+#pix_per_cell = 8
+#cell_per_block = 2
 # Call our function with vis=True to see an image output
-features, hog_image = get_hog_features(gray, orient, 
-                        pix_per_cell, cell_per_block, 
-                        vis=True, feature_vec=False)
+#features, hog_image = get_hog_features(gray, orient, 
+#                        pix_per_cell, cell_per_block, 
+#                        vis=True, feature_vec=False)
 
-debug_hog_image = False
-if debug_hog_image == True:
-	fig = plt.figure()
-	plt.subplot(121)
-	plt.imshow(image, cmap='gray')
-	plt.title('Example Car Image')
-	plt.subplot(122)
-	plt.imshow(hog_image, cmap='gray')
-	plt.title('HOG Visualization')
-	plt.show()
+#debug_hog_image = False
+#if debug_hog_image == True:
+#	fig = plt.figure()
+#	plt.subplot(121)
+#	plt.imshow(image, cmap='gray')
+#	plt.title('Example Car Image')
+#	plt.subplot(122)
+#	plt.imshow(hog_image, cmap='gray')
+#	plt.title('HOG Visualization')
+#	plt.show()
 
+# Reduce the sample size because HOG features are slow to compute
+# The quiz evaluator times out after 13s of CPU time
+REDUCE_SAMPLE_SIZE = False
+if REDUCE_SAMPLE_SIZE == True:
+	sample_size = 50
+	cars = cars[0:sample_size]
+	notcars = notcars[0:sample_size]
 
 ###########################################################
 ### Color Features
@@ -458,12 +466,6 @@ notcar_color_features = extract_color_features(notcars, cspace='RGB', spatial_si
                         hist_bins=histbin, hist_range=(0, 256))
 ###########################################################
 
-
-# Reduce the sample size because HOG features are slow to compute
-# The quiz evaluator times out after 13s of CPU time
-#sample_size = 500
-#cars = cars[0:sample_size]
-#notcars = notcars[0:sample_size]
 
 ###########################################################
 ### Hog Features
@@ -487,17 +489,17 @@ print(round(t2-t, 2), 'Seconds to extract HOG features...')
 
 ###########################################################
 ### Combined Features
-color_space = 'RGB' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
-orient = 9  # HOG orientations
+color_space = 'HSV' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
+orient =8  # HOG orientations
 pix_per_cell = 8 # HOG pixels per cell
-cell_per_block = 2 # HOG cells per block
-hog_channel = 0 # Can be 0, 1, 2, or "ALL"
-spatial_size = (16, 16) # Spatial binning dimensions
-hist_bins = 16    # Number of histogram bins
+cell_per_block = 1 # HOG cells per block
+hog_channel = 0#'ALL' # Can be 0, 1, 2, or "ALL"
+spatial_size = (32, 32) # Spatial binning dimensions
+hist_bins = 32    # Number of histogram bins
 spatial_feat = True # Spatial features on or off
 hist_feat = True # Histogram features on or off
 hog_feat = True # HOG features on or off
-y_start_stop = [450, 700] # Min and max in y to search in slide_window()
+y_start_stop = [350, 700] # Min and max in y to search in slide_window()
 
 combined_car_features = extract_features(cars, color_space=color_space, 
                         spatial_size=spatial_size, hist_bins=hist_bins, 
@@ -554,7 +556,7 @@ if debug_car_features == True:
 		plt.show()
 	else: 
     		print('Your function only returns empty feature vectors...')
-
+#print(car_features)
 # Create an array stack of feature vectors
 X = np.vstack((car_features, notcar_features)).astype(np.float64)                        
 # Fit a per-column scaler
@@ -592,67 +594,123 @@ except:
 	print('Test Accuracy of SVC = ', round(svc.score(X_test, y_test), 4))
 	# Check the prediction time for a single sample
 	t=time.time()
-	n_predict = 10
+	n_predict = 20
 	print('My SVC predicts: ', svc.predict(X_test[0:n_predict]))
 	print('For these',n_predict, 'labels: ', y_test[0:n_predict])
 	t2 = time.time()
 	print(round(t2-t, 5), 'Seconds to predict', n_predict,'labels with SVC')
-    	joblib.dump(svc,filename)
+    	#joblib.dump(svc,filename)
 
 
+
+#from pypreprocessor import pypreprocessor
+#pypreprocessor.parse()
+
+##define IMAGE
 # Draw on image
+count = 0
+cap = cv2.VideoCapture('project_video.mp4')
+images = glob.glob('test_images/*.jpg')
+# Image ->
+#ifdef IMAGE
+for img in images:
+       	print(img)
+       	imgname = img.split('/')[1]
+       	outfd = "output_images/"
+       	print(imgname)
+	import matplotlib.image as mpimg
+	image = mpimg.imread(img)
+	fig = plt.figure()
+	plt.subplot(121)
+	plt.imshow(image)
+	plt.title('Original Image')
+	fig.tight_layout()
+	plt.show()
+# <- Image
+# Video ->
+#else
+#while cap.isOpened():
+#	print("before cap.read")
+#    	ret,frame = cap.read()
+#	if ret != 1:
+#		print("ret is not 1 for cap.read")
+		#continue
+#		break
+#    	count = count + 1
+#    	if cv2.waitKey(10) & 0xFF == ord('q'):
+#        	break
+#    	image = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+# <- Video
+#endif
+	#image = mpimg.imread('bbox-example-image.jpg')
+	#image = mpimg.imread('test_images/test1.jpg')
+	draw_image = np.copy(image)
 
-#image = mpimg.imread('bbox-example-image.jpg')
-image = mpimg.imread('test_images/test1.jpg')
-draw_image = np.copy(image)
+	# Uncomment the following line if you extracted training
+	# data from .png images (scaled 0 to 1 by mpimg) and the
+	# image you are searching is a .jpg (scaled 0 to 255)
+	#image = image.astype(np.float32)/255
+	windows_far = slide_window(image, x_start_stop=[None, None], y_start_stop=[450, 600], 
+                    xy_window=(64, 64), xy_overlap=(0.6, 0.6))
+	windows_middle = slide_window(image, x_start_stop=[None, None], y_start_stop=[500, 650], 
+                    xy_window=(128, 128), xy_overlap=(0.7, 0.7))
+	windows_close = slide_window(image, x_start_stop=[None, None], y_start_stop=[450, 750], 
+                    xy_window=(256, 256), xy_overlap=(0.8, 0.8)) 
+	windows = windows_far + windows_middle + windows_close #slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop, 
+                  #  xy_window=(96, 96), xy_overlap=(0.5, 0.5))
 
-# Uncomment the following line if you extracted training
-# data from .png images (scaled 0 to 1 by mpimg) and the
-# image you are searching is a .jpg (scaled 0 to 255)
-#image = image.astype(np.float32)/255
-
-windows = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop, 
-                    xy_window=(96, 96), xy_overlap=(0.5, 0.5))
-
-hot_windows = search_windows(image, windows, svc, X_scaler, color_space=color_space, 
+	hot_windows = search_windows(image, windows, svc, X_scaler, color_space=color_space, 
                         spatial_size=spatial_size, hist_bins=hist_bins, 
                         orient=orient, pix_per_cell=pix_per_cell, 
                         cell_per_block=cell_per_block, 
                         hog_channel=hog_channel, spatial_feat=spatial_feat, 
                         hist_feat=hist_feat, hog_feat=hog_feat)                       
 
-window_img = draw_boxes(draw_image, hot_windows, color=(0, 0, 255), thick=6)                    
+	window_img = draw_boxes(draw_image, hot_windows, color=(0, 0, 255), thick=6)                    
 
-plt.imshow(window_img)
-plt.show()
+	#plt.imshow(window_img)
+	#plt.show()
 
 
 
-##############################
-# Read in image similar to one shown above 
-#image = mpimg.imread('test_image.jpg')
-box_list = hot_windows
-heat = np.zeros_like(image[:,:,0]).astype(np.float)
+	##############################
+	# Read in image similar to one shown above 
+	#image = mpimg.imread('test_image.jpg')
+	box_list = hot_windows
+	heat = np.zeros_like(image[:,:,0]).astype(np.float)
 
-# Add heat to each box in box list
-heat = add_heat(heat,box_list)
+	# Add heat to each box in box list
+	heat = add_heat(heat,box_list)
     
-# Apply threshold to help remove false positives
-heat = apply_threshold(heat,1)
+	# Apply threshold to help remove false positives
+	heat = apply_threshold(heat,1)
 
-# Visualize the heatmap when displaying    
-heatmap = np.clip(heat, 0, 255)
+	# Visualize the heatmap when displaying    
+	heatmap = np.clip(heat, 0, 255)
 
-# Find final boxes from heatmap using label function
-labels = label(heatmap)
-draw_img = draw_labeled_bboxes(np.copy(image), labels)
+	# Find final boxes from heatmap using label function
+	labels = label(heatmap)
+	draw_img = draw_labeled_bboxes(np.copy(image), labels)
 
-fig = plt.figure()
-plt.subplot(121)
-plt.imshow(draw_img)
-plt.title('Car Positions')
-plt.subplot(122)
-plt.imshow(heatmap, cmap='hot')
-plt.title('Heat Map')
-fig.tight_layout()
-plt.show()
+	fig = plt.figure()
+	plt.subplot(121)
+	plt.imshow(window_img)
+	plt.title('Car Positions')
+	plt.subplot(122)
+	plt.imshow(heatmap, cmap='hot')
+	plt.title('Heat Map')
+	fig.tight_layout()
+	plt.show()
+#ifdef IMAGE
+# Image ->
+        write_name = outfd  +imgname 
+        result = cv2.cvtColor(draw_img, cv2.COLOR_BGR2RGB)
+        cv2.imwrite(write_name, result)
+# <- Image 
+#else
+# Video ->
+#    	displayimage = cv2.cvtColor(draw_img, cv2.COLOR_BGR2RGB)
+#    	cv2.imshow('window-name',displayimage)
+#    	cv2.waitKey(50)
+# <- Video
+#endif
