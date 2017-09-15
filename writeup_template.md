@@ -16,17 +16,17 @@ The goals / steps of this project are the following:
 [image1]: ./output_images/car_1.png
 [image1_1]: ./output_images/notcar_1.png
 [image2]: ./output_images/car_1_hig.png
-[image3]: ./output_images/sliding_w_step1.jpg
-[image4]: ./output_images/sliding_w_step2.jpg
-[image4_1]: ./output_images/sliding_w_step3.jpg
-[image4_2]: ./output_images/window_boxes.jpg
+[image3]: ./output_images/sliding_w_step1.png
+[image4]: ./output_images/sliding_w_step2.png
+[image4_1]: ./output_images/sliding_w_step3.png
+[image4_2]: ./output_images/window_boxes.png
 [image5]: ./output_images/bboxes_and_heat.png
 [image6]: ./output_images/labels_map.png
 [image7]: ./output_images/output_bboxes.png
 [video1]: ./project_video.mp4
 
 
-###Histogram of Oriented Gradients (HOG)
+*###Histogram of Oriented Gradients (HOG)
 
 ####1. Explain how (and identify where in your code) you extracted HOG features from the training images.
 
