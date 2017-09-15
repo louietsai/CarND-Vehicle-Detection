@@ -16,19 +16,17 @@ The goals / steps of this project are the following:
 [image1]: ./output_images/car_1.png
 [image1_1]: ./output_images/notcar_1.png
 [image2]: ./output_images/car_1_hig.png
-[image3]: ./output_images/sliding_w_step1.jpg
-[image4]: ./output_images/sliding_w_step2.jpg
-[image4_1]: ./output_images/sliding_w_step3.jpg
-[image4_2]: ./output_images/window_boxes.jpg
+[image3]: ./output_images/sliding_w_step1.png
+[image4]: ./output_images/sliding_w_step2.png
+[image4_1]: ./output_images/sliding_w_step3.png
+[image4_2]: ./output_images/window_boxes.png
 [image5]: ./output_images/bboxes_and_heat.png
 [image6]: ./output_images/labels_map.png
 [image7]: ./output_images/output_bboxes.png
 [video1]: ./project_video.mp4
 
 
-###Histogram of Oriented Gradients (HOG)
-
-####1. Explain how (and identify where in your code) you extracted HOG features from the training images.
+**###Histogram of Oriented Gradients (HOG)**
 
 The code for this step is contained in lines #474 through #498 of the file called `VehicheDetect.py`.  
 
@@ -45,7 +43,7 @@ Here is an example using the `LUV` color space and HOG parameters of `orientatio
 
 ![alt text][image2]
 
-####2. Explain how you settled on your final choice of HOG parameters.
+**####2.  HOG parameters.**
 
 I tried various combinations of parameters. found that small orientation may not be good for accuracy, and too small pixels_per_cell makes too larger data size.
 In the end, I used below parameters.
@@ -54,13 +52,13 @@ orient = 8  # HOG orientations
 pix_per_cell = 8 # HOG pixels per cell
 cell_per_block = 2 # HOG cells per block
 
-####3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
+**####3.  trained a classifier using  selected HOG features ).**
 The code for this step is contained in lines #500 through #519 of the file called `VehicheDetect.py`.  
 I trained a linear SVM using normalized combined features including spatial, hist, and hog features. I used 80% of data as training data set, and 20% of data as testing data set.
 the accuracy rate is  0.9868.
 
-###Sliding Window Search
-
+**###Sliding Window Search**
+The code for this step is contained in lines #366 through #417 of the file called `VehicheDetect.py`. 
 There are several different stages for my sliding window search.
 
 1. no tracking object, and search all portion of the road like below diagram.
@@ -79,35 +77,24 @@ Ultimately I searched on two scales using LUV HOG features plus spatially binned
 ![alt text][image4_2]
 ---
 
-### Video Implementation
+**### Video Implementation**
 
-####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are ok as long as you are identifying the vehicles most of the time with minimal false positives.)
-Here's a [link to my video result](./project_video.mp4)
+Here's a [link to my video result](./project_video_output.avi)
 
 
-####2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
-
-I recorded the positions of positive detections in each frame of the video.  From the positive detections I created a heatmap and then thresholded that map to identify vehicle positions.  I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap.  I then assumed each blob corresponded to a vehicle.  I constructed bounding boxes to cover the area of each blob detected.  
-
-Here's an example result showing the heatmap from a series of frames of video, the result of `scipy.ndimage.measurements.label()` and the bounding boxes then overlaid on the last frame of video:
-
-### Here are six frames and their corresponding heatmaps:
-
-![alt text][image5]
-
-### Here is the output of `scipy.ndimage.measurements.label()` on the integrated heatmap from all six frames:
-![alt text][image6]
-
-### Here the resulting bounding boxes are drawn onto the last frame in the series:
-![alt text][image7]
-
+I recorded the positions of positive detections in each frame of the video.  
+From the positive detections I created a heatmap and then thresholded that map to identify vehicle positions.
+The code for this step is contained in lines #419 through #431 of the file called `VehicheDetect.py`.
+I then assumed each blob corresponded to a vehicle.  
+I constructed bounding boxes to cover the area of each blob detected.  
 
 
 ---
 
-###Discussion
+**###Discussion**
+For tracked car in track_list, I didn't remove the tracked car from the list even if I can't find any car around the previous tracked car. Therefore, there will be still a bounding box if the car just disappear in the next frame.
+it may not happen in the video, but it happen if we use some none consecutive test images.
+will try to improve later
 
-####1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
-
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+ 
 
