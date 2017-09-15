@@ -26,9 +26,7 @@ The goals / steps of this project are the following:
 [video1]: ./project_video.mp4
 
 
-****###Histogram of Oriented Gradients (HOG)****
-
-####1. Explain how (and identify where in your code) you extracted HOG features from the training images.
+**###Histogram of Oriented Gradients (HOG)**
 
 The code for this step is contained in lines #474 through #498 of the file called `VehicheDetect.py`.  
 
@@ -45,7 +43,7 @@ Here is an example using the `LUV` color space and HOG parameters of `orientatio
 
 ![alt text][image2]
 
-####2. Explain how you settled on your final choice of HOG parameters.
+**####2.  HOG parameters.**
 
 I tried various combinations of parameters. found that small orientation may not be good for accuracy, and too small pixels_per_cell makes too larger data size.
 In the end, I used below parameters.
@@ -59,7 +57,7 @@ The code for this step is contained in lines #500 through #519 of the file calle
 I trained a linear SVM using normalized combined features including spatial, hist, and hog features. I used 80% of data as training data set, and 20% of data as testing data set.
 the accuracy rate is  0.9868.
 
-###Sliding Window Search
+**###Sliding Window Search**
 
 There are several different stages for my sliding window search.
 
@@ -79,7 +77,7 @@ Ultimately I searched on two scales using LUV HOG features plus spatially binned
 ![alt text][image4_2]
 ---
 
-### Video Implementation
+**### Video Implementation**
 
 ####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are ok as long as you are identifying the vehicles most of the time with minimal false positives.)
 Here's a [link to my video result](./project_video.mp4)
